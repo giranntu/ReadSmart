@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ReadSmart SG - Your Personal Reading Companion</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f0f4f8;
+        }
+        .gradient-bg {
+            background: linear-gradient(90deg, #4f46e5 0%, #7c3aed 100%);
+        }
+        .card {
+            background-color: white;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .highlight-sentence {
+            background-color: #fef3c7;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        .highlight-sentence:hover {
+            background-color: #fde68a;
+        }
+        .badge {
+            width: 40px;
+            height: 40px;
+            margin: 0 5px;
+        }
+        .progress-bar {
+            transition: width 0.5s ease-in-out;
+        }
+        #reading-material {
+            line-height: 1.8;
+        }
+        .sentence {
+            padding: 2px 0;
+            border-radius: 3px;
+            transition: background-color 0.3s ease;
+        }
+        .sentence:hover {
+            background-color: #e5e7eb;
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <nav class="gradient-bg text-white p-4 sticky top-0 z-50">
+        <div class="container mx-auto flex justify-between items-center">
+            <h1 class="text-2xl font-bold">ReadSmart SG</h1>
+            <div id="user-info" class="hidden">
+                <span id="student-name" class="mr-4"></span>
+                <div id="badges" class="flex"></div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mx-auto p-4">
+        <!-- Login Screen -->
+        <div id="login-screen" class="card p-6 max-w-md mx-auto mt-10">
+            <h2 class="text-2xl font-semibold mb-4">Welcome to ReadSmart SG</h2>
+            <form id="login-form" class="space-y-4">
+                <div>
+                    <label for="student-id" class="block text-sm font-medium text-gray-700">Student ID:</label>
+                    <input type="text" id="student-id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" required>
+                </div>
+                <div>
+                    <label for="grade-level" class="block text-sm font-medium text-gray-700">Grade Level:</label>
+                    <select id="grade-level" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50" required>
+                        <option value="">Select your grade</option>
+                        <option value="1">Primary 1</option>
+                        <option value="2">Primary 2</option>
+                        <option value="3">Primary 3</option>
+                        <option value="4">Primary 4</option>
+                        <option value="5">Primary 5</option>
+                        <option value="6">Primary 6</option>
+                    </select>
+                </div>
+                <button type="submit" class="w-full bg-indigo-600 text-white px-4 py-2 rounded-md font-semibold hover:bg-indigo-700 transition">Start Learning</button>
+            </form>
+        </div>
+
+        <!-- Main Learning Interface -->
+        <div id="learning-interface" class="hidden mt-6">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="card p-6 col-span-2">
+                    <h2 class="text-2xl font-semibold mb-4">Your Reading Material</h2>
+                    <div id="reading-material" class="prose max-w-none mb-4"></div>
+                    <button id="explain-sentence-btn" class="w-full bg-green-500 text-white px-4 py-2 rounded-md font-semibold hover:bg-green-600 transition mb-2">Explain Selected Sentence</button>
+                    <button id="read-aloud-btn" class="w-full bg-blue-500 text-white px-4 py-2 rounded-md font-semibold hover:bg-blue-600 transition mb-2">Read Aloud</button>
+                    <button id="finish-reading-btn" class="w-full bg-indigo-600 text-white px-4 py-2 rounded-md font-semibold hover:bg-indigo-700 transition">Finish Reading</button>
+                </div>
+                <div class="space-y-6">
+                    <div class="card p-6">
+                        <h2 class="text-2xl font-semibold mb-4">Your Progress</h2>
+                        <div id="progress-bar" class="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700 mb-4">
+                            <div class="bg-blue-600 h-2.5 rounded-full progress-bar" style="width: 0%"></div>
+                        </div>
+                        <p id="progress-text" class="text-center font-semibold"></p>
+                    </div>
+                    <div class="card p-6">
+                        <h2 class="text-2xl font-semibold mb-4">Reading Stats</h2>
+                        <p id="sentences-explained" class="mb-2"></p>
+                        <p id="readings-completed" class="mb-2"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quiz Interface -->
+        <div id="quiz-interface" class="hidden card p-6 mt-6">
+            <h2 class="text-2xl font-semibold mb-4">Quiz Time!</h2>
+            <div id="quiz-questions"></div>
+            <button id="submit-quiz-btn" class="w-full bg-indigo-600 text-white px-4 py-2 rounded-md font-semibold hover:bg-indigo-700 transition mt-4">Submit Quiz</button>
+        </div>
+
+        <!-- Chat Interface -->
+        <div id="chat-interface" class="hidden card p-6 mt-6">
+            <h2 class="text-2xl font-semibold mb-4">Chat with Your Reading Buddy</h2>
+            <div id="chat-messages" class="h-64 overflow-y-auto mb-4 p-4 border rounded-md bg-gray-50"></div>
+            <form id="chat-form" class="flex">
+                <input type="text" id="chat-input" class="flex-grow p-2 border rounded-l-md focus:outline-none focus:ring-2 focus:ring-indigo-200" placeholder="Ask your Reading Buddy...">
+                <button type="submit" class="bg-indigo-600 text-white px-4 py-2 rounded-r-md font-semibold hover:bg-indigo-700 transition">Send</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // DOM elements
+        const loginScreen = document.getElementById('login-screen');
+        const learningInterface = document.getElementById('learning-interface');
+        const quizInterface = document.getElementById('quiz-interface');
+        const chatInterface = document.getElementById('chat-interface');
+        const loginForm = document.getElementById('login-form');
+        const readingMaterial = document.getElementById('reading-material');
+        const explainSentenceBtn = document.getElementById('explain-sentence-btn');
+        const readAloudBtn = document.getElementById('read-aloud-btn');
+        const finishReadingBtn = document.getElementById('finish-reading-btn');
+        const progressBar = document.getElementById('progress-bar').querySelector('div');
+        const progressText = document.getElementById('progress-text');
+        const sentencesExplained = document.getElementById('sentences-explained');
+        const readingsCompleted = document.getElementById('readings-completed');
+        const quizQuestions = document.getElementById('quiz-questions');
+        const submitQuizBtn = document.getElementById('submit-quiz-btn');
+        const chatForm = document.getElementById('chat-form');
+        const chatMessages = document.getElementById('chat-messages');
+        const chatInput = document.getElementById('chat-input');
+        const userInfo = document.getElementById('user-info');
+        const studentName = document.getElementById('student-name');
+        const badges = document.getElementById('badges');
+
+        let studentId, gradeLevel, currentText, explainedSentences = [];
+        let readingCount = 0;
+
+        // Event listeners
+        loginForm.addEventListener('submit', handleLogin);
+        explainSentenceBtn.addEventListener('click', explainSelectedSentence);
+        readAloudBtn.addEventListener('click', readAloud);
+        finishReadingBtn.addEventListener('click', finishReading);
+        submitQuizBtn.addEventListener('click', submitQuiz);
+        chatForm.addEventListener('submit', sendChatMessage);
+
+        // Login handler
+        async function handleLogin(e) {
+            e.preventDefault();
+            studentId = document.getElementById('student-id').value;
+            gradeLevel = document.getElementById('grade-level').value;
+
+            try {
+                const response = await fetch('/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ student_id: studentId, grade_level: parseInt(gradeLevel) })
+                });
+
+                if (response.ok) {
+                    loginScreen.classList.add('hidden');
+                    learningInterface.classList.remove('hidden');
+                    chatInterface.classList.remove('hidden');
+                    userInfo.classList.remove('hidden');
+                    studentName.textContent = `Student ID: ${studentId}`;
+                    loadReadingMaterial();
+                    updateStudentInfo();
+                } else {
+                    throw new Error('Login failed');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Login failed. Please try again.');
+            }
+        }
+
+        // Load reading material
+        async function loadReadingMaterial() {
+            try {
+                const response = await fetch('/sample_readings');
+                const samples = await response.json();
+                const sample = samples.find(s => s.grade_level === parseInt(gradeLevel)) || samples[0];
+                currentText = sample.text;
+                readingMaterial.innerHTML = marked.parse(currentText);
+                addSentenceHighlighting();
+                readingCount++;
+                updateReadingStats();
+            } catch (error) {
+                console.error('Error loading reading material:', error);
+                alert('Failed to load reading material. Please try again.');
+            }
+        }
+
+        // Update student info
+        async function updateStudentInfo() {
+            try {
+                const response = await fetch(`/student/${studentId}`);
+                const studentInfo = await response.json();
+                updateProgress(studentInfo.progress[studentInfo.progress.length - 1]);
+                updateAchievements(studentInfo.achievements);
+                updateReadingStats();
+            } catch (error) {
+                console.error('Error updating student info:', error);
+            }
+        }
+
+        // Add sentence highlighting functionality
+        function addSentenceHighlighting() {
+            const content = readingMaterial.innerHTML;
+            const wrappedContent = content.replace(/([.!?])\s+(?=[A-Z])/g, '$1</span><span class="sentence">');
+            readingMaterial.innerHTML = '<span class="sentence">' + wrappedContent + '</span>';
+            
+            readingMaterial.addEventListener('click', (e) => {
+                if (e.target.classList.contains('sentence')) {
+                    document.querySelectorAll('.sentence').forEach(s => s.classList.remove('highlight-sentence'));
+                    e.target.classList.add('highlight-sentence');
+                }
+            });
+        }
+
+        // Explain selected sentence
+        async function explainSelectedSentence() {
+            const selectedSentence = document.querySelector('.highlight-sentence');
+            if (!selectedSentence) {
+                alert('Please select a sentence to explain.');
+                return;
+            }
+
+            try {
+                const response = await fetch('/explain_sentence', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        sentence: selectedSentence.textContent,
+                        context: currentText,
+                        grade_level: parseInt(gradeLevel)
+                    })
+                });
+
+                const result = await response.json();
+                displayExplanation(result.explanation);
+                explainedSentences.push(selectedSentence.textContent);
+                updateReadingStats();
+            } catch (error) {
+                console.error('Error explaining sentence:', error);
+                alert('Failed to explain sentence. Please try again.');
+            }
+        }
+
+        // Display sentence explanation
+        function displayExplanation(explanationMarkdown) {
+            const explanationDiv = document.createElement('div');
+            explanationDiv.classList.add('mt-4', 'p-4', 'bg-yellow-100', 'rounded-md');
+            explanationDiv.innerHTML = marked.parse(explanationMarkdown);
+            readingMaterial.appendChild(explanationDiv);
+        }
+
+        // Read aloud functionality
+        async function readAloud() {
+            try {
+                const response = await fetch('/text-to-speech', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text: currentText })
+                });
+
+                const result = await response.json();
+                const audio = new Audio(`data:audio/mp3;base64,${result.audio_content}`);
+                audio.play();
+            } catch (error) {
+                console.error('Error reading aloud:', error);
+                alert('Failed to read aloud. Please try again.');
+            }
+        }
+
+        // Finish reading and generate quiz
+        async function finishReading() {
+            try {
+                const response = await fetch('/generate_quiz', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        student_id: studentId,
+                        text: currentText,
+                        explained_sentences: explainedSentences
+                    })
+                });
+
+                const quiz = await response.json();
+                displayQuiz(quiz);
+                learningInterface.classList.add('hidden');
+                quizInterface.classList.remove('hidden');
+                updateStudentInfo();
+            } catch (error) {
+                console.error('Error generating quiz:', error);
+                alert('Failed to generate quiz. Please try again.');
+            }
+        }
+
+        // Display quiz
+        function displayQuiz(quiz) {
+            quizQuestions.innerHTML = '';
+
+            // Multiple choice questions
+            quiz.multiple_choice.forEach((question, index) => {
+                const questionDiv = document.createElement('div');
+                questionDiv.classList.add('mb-4');
+                questionDiv.innerHTML = `
+                    <p class="font-semibold">${index + 1}. ${question.question}</p>
+                    ${question.options.map((option, i) => `
+                        <div class="ml-4">
+                            <input type="radio" id="mc_${index}_${i}" name="mc_${index}" value="${option}">
+                            <label for="mc_${index}_${i}">${option}</label>
+                        </div>
+                    `).join('')}
+                `;
+                quizQuestions.appendChild(questionDiv);
+            });
+
+            // True/False questions
+            quiz.true_false.forEach((question, index) => {
+                const questionDiv = document.createElement('div');
+                questionDiv.classList.add('mb-4');
+                questionDiv.innerHTML = `
+                    <p class="font-semibold">${quiz.multiple_choice.length + index + 1}. ${question.question}</p>
+                    <div class="ml-4">
+                        <input type="radio" id="tf_${index}_true" name="tf_${index}" value="true">
+                        <label for="tf_${index}_true">True</label>
+                    </div>
+                    <div class="ml-4">
+                        <input type="radio" id="tf_${index}_false" name="tf_${index}" value="false">
+                        <label for="tf_${index}_false">False</label>
+                    </div>
+                `;
+                quizQuestions.appendChild(questionDiv);
+            });
+
+            // Short answer questions
+            quiz.short_answer.forEach((question, index) => {
+                const questionDiv = document.createElement('div');
+                questionDiv.classList.add('mb-4');
+                questionDiv.innerHTML = `
+                    <p class="font-semibold">${quiz.multiple_choice.length + quiz.true_false.length + index + 1}. ${question.question}</p>
+                    <textarea class="w-full p-2 border rounded" rows="3" id="sa_${index}"></textarea>
+                `;
+                quizQuestions.appendChild(questionDiv);
+            });
+        }
+
+        // Submit quiz
+        function submitQuiz() {
+            // Here you would typically send the quiz answers to the server for grading
+            // For this demo, we'll just show a completion message
+            alert('Quiz submitted successfully! Great job!');
+            quizInterface.classList.add('hidden');
+            learningInterface.classList.remove('hidden');
+            loadReadingMaterial(); // Load new reading material
+        }
+
+        // Update progress bar
+        function updateProgress(progress) {
+            progressBar.style.width = `${progress}%`;
+            progressText.textContent = `${progress}% Complete`;
+        }
+
+        // Update reading stats
+        function updateReadingStats() {
+            sentencesExplained.textContent = `Sentences Explained: ${explainedSentences.length}`;
+            readingsCompleted.textContent = `Readings Completed: ${readingCount}`;
+        }
+
+        // Update achievements
+        function updateAchievements(achievementList) {
+            badges.innerHTML = achievementList.map(achievement => 
+                `<img src="/static/badges/${achievement.toLowerCase().replace(/\s+/g, '_')}.png" alt="${achievement}" title="${achievement}" class="badge">`
+            ).join('');
+        }
+
+        // Send chat message
+        async function sendChatMessage(e) {
+            e.preventDefault();
+            const message = chatInput.value;
+            appendMessage('You', message);
+            
+            try {
+                const response = await fetch('/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        student_id: studentId,
+                        message: message
+                    })
+                });
+                
+                const result = await response.json();
+                appendMessage('Reading Buddy', result.response);
+            } catch (error) {
+                console.error('Error sending chat message:', error);
+                appendMessage('System', 'Sorry, there was an error processing your message. Please try again.');
+            }
+            
+            chatInput.value = '';
+        }
+
+        // Append chat message
+        function appendMessage(sender, content) {
+            const messageElement = document.createElement('div');
+            messageElement.classList.add('mb-2');
+            messageElement.innerHTML = `<strong class="font-semibold">${sender}:</strong> ${content}`;
+            chatMessages.appendChild(messageElement);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+    </script>
+</body>
+</html>

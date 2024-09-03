@@ -1,0 +1,7 @@
+fastapi
+uvicorn
+pydantic
+sqlalchemy
+google-cloud-aiplatform
+python-dotenv
+vertexai
