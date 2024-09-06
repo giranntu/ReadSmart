@@ -1,5 +1,7 @@
 # Personalized Reading Support System
 
+![Main Screenshot](image.png)
+
 This project uses Gemini 1.5 Pro to provide an interactive and engaging personalized reading support experience for students. It analyzes student reading submissions, provides feedback, generates tailored reading materials, and includes gamification elements to motivate students.
 
 ## Features
