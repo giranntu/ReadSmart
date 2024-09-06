@@ -17,8 +17,8 @@ This project uses Gemini 1.5 Pro to provide an interactive and engaging personal
 
 1. Clone the repository:
    ```
-   git clone https://github.com/your-username/personalized-reading-support.git
-   cd personalized-reading-support
+   git clone https://github.com/giranntu/ReamSmart.git
+   cd ReamSmart
    ```
 
 2. Create a virtual environment and activate it:
