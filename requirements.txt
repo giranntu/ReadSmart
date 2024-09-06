@@ -5,3 +5,5 @@ sqlalchemy
 google-cloud-aiplatform
 python-dotenv
 vertexai
+google-cloud-texttospeech
+json_repair
